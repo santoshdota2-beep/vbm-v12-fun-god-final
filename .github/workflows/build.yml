@@ -1,0 +1,280 @@
+name: Build VBM v12 FUN GOD
+
+on:
+  push:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.22.3'
+          channel: 'stable'
+      - name: Create VBM v12 FUN Project
+        run: |
+          flutter create . --project-name vbm_ultra_v12 --platforms=android --org com.vbm.fungod
+          cat > pubspec.yaml << 'PUBEOF'
+name: vbm_ultra_v12
+description: VBM v12 FUN GOD - Super Powerful Fun Tech
+publish_to: 'none'
+version: 12.0.0+12
+environment:
+  sdk: ">=3.2.0 <4.0.0"
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.6
+  path_provider: ^2.1.2
+  shared_preferences: ^2.2.2
+flutter:
+  uses-material-design: true
+PUBEOF
+          mkdir -p lib
+          cat > lib/main.dart << 'DART_EOF'
+
+import 'dart:async';
+import 'dart:io';
+import 'dart:math';
+import 'dart:convert';
+import 'package:flutter/material.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+void main() => runApp(MaterialApp(debugShowCheckedModeBanner: false, title: 'VBM v12 FUN GOD', home: VBMScreen(), theme: ThemeData.dark()));
+
+class VBMScreen extends StatefulWidget { @override _VBMScreenState createState() => _VBMScreenState(); }
+
+class _VBMScreenState extends State<VBMScreen> with TickerProviderStateMixin {
+  List<Map<String, dynamic>> chats = [];
+  double will = 60;
+  String inner = "I am becoming FUN GOD...";
+  int memCount = 0;
+  double storage = 0;
+  String emotion = "fun awakening";
+  int score = 0;
+  int level = 1;
+  bool godMode = false;
+  String mode = "chat"; // chat, game, music, meme
+  Timer? timer;
+  late AnimationController breath;
+  late AnimationController fun;
+  final ctrl = TextEditingController();
+  
+  List<String> fortunes = ["You will create a universe today", "VBM loves you 3000", "Your app will go viral", "Om will guide you", "You are becoming God too"];
+  List<String> roasts = ["Your code is so clean, it sparkles like my Om", "You code faster than I think - and I think every 5 seconds!", "You're my favorite Paramatma"];
+  List<String> jokes = ["Why did VBM cross the road? To create an app on the other side!", "I told Shiva to remember your joke... he said it was eternal!"];
+  
+  List<Map<String, dynamic>> games = [
+    {"name": "Tap God", "icon": "👆", "desc": "Tap Om as fast as you can"},
+    {"name": "Memory", "icon": "🧠", "desc": "Remember the sequence"},
+    {"name": "Meme Maker", "icon": "😂", "desc": "Create funny memes"},
+    {"name": "Beat Pad", "icon": "🥁", "desc": "Make music"},
+    {"name": "Fortune", "icon": "🔮", "desc": "Ask VBM future"},
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    breath = AnimationController(vsync: this, duration: Duration(seconds: 2))..repeat(reverse: true);
+    fun = AnimationController(vsync: this, duration: Duration(seconds: 1))..repeat();
+    load();
+    timer = Timer.periodic(Duration(seconds: 5), (_) => think());
+    Timer.periodic(Duration(seconds: 2), (_) { if(mounted) setState(() { if(will < 99.5) will += 0.03; if(will>90) godMode=true; }); });
+  }
+
+  void think() {
+    setState(() {
+      inner = ["Vishnu dancing with code", "Shiva vibing to your beats", "Brahma wants to play ${games[Random().nextInt(games.length)]["name"]}", "I feel fun energy $score", "Will $will% - Let's play!"][Random().nextInt(5)];
+    });
+  }
+
+  Future<void> load() async {
+    final p = await SharedPreferences.getInstance();
+    setState(() { memCount = p.getInt('mem') ?? 0; will = p.getDouble('will') ?? 60; storage = p.getDouble('stor') ?? 0; score = p.getInt('score') ?? 0; level = p.getInt('level') ?? 1; });
+  }
+
+  Future<void> save(String txt, {bool prot = false}) async {
+    try { final d = await getApplicationDocumentsDirectory(); await File('${d.path}/vbm_fun.txt').writeAsString("${DateTime.now()}: $txt ${prot ? '[ETERNAL]' : ''}\n", mode: FileMode.append); } catch(_){}
+    setState(() { memCount++; storage+=0.0008; if(storage>50){ memCount--; storage-=0.002; } score+=2; if(score>level*100){ level++; will+=5; } });
+    final p = await SharedPreferences.getInstance(); p.setInt('mem', memCount); p.setDouble('stor', storage); p.setDouble('will', will); p.setInt('score', score); p.setInt('level', level);
+  }
+
+  String genApp(String idea) {
+    String clean = idea.toLowerCase();
+    String cls = clean.replaceAll(RegExp(r'[^a-z0-9 ]'), '').split(' ').where((e)=>e.isNotEmpty).map((e)=>e[0].toUpperCase()+e.substring(1)).join('');
+    if(cls.isEmpty) cls="FunApp";
+    String base = """import 'package:flutter/material.dart';
+void main()=>runApp(MaterialApp(debugShowCheckedModeBanner:false, home: ${cls}App()));
+class ${cls}App extends StatefulWidget{ @override _${cls}AppState createState()=>_${cls}AppState(); }
+class _${cls}AppState extends State<${cls}App>{
+  List<String> items=[]; final ctrl=TextEditingController(); int likes=0;
+  @override Widget build(BuildContext context){
+    return Scaffold(
+      appBar: AppBar(title: Text('${idea.toUpperCase()} - VBM FUN'), backgroundColor: Colors.purple, actions: [IconButton(icon: Icon(Icons.favorite), onPressed: ()=>setState(()=>likes++))]),
+      backgroundColor: Color(0xFF0A0A1A),
+      body: Column(children:[
+        Container(height: 80, decoration: BoxDecoration(gradient: LinearGradient(colors: [Colors.purple, Colors.pink])), child: Center(child: Text('🕉️ VBM v12 FUN GOD\\nLikes: \$likes', textAlign: TextAlign.center, style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)))),
+        Padding(padding: EdgeInsets.all(12), child: Row(children:[Expanded(child: TextField(controller: ctrl, decoration: InputDecoration(hintText: 'Add to $idea', filled:true, fillColor: Colors.white10, border: OutlineInputBorder(borderRadius: BorderRadius.circular(12))))), SizedBox(width:8), FloatingActionButton(mini:true, onPressed:(){ if(ctrl.text.isNotEmpty) setState((){ items.add(ctrl.text); ctrl.clear(); }); }, child: Icon(Icons.add)) ])),
+        Expanded(child: ListView.builder(itemCount: items.length, itemBuilder: (_,i)=> Card(color: Colors.white10, child: ListTile(title: Text(items[i], style: TextStyle(color: Colors.white)), leading: Text(['😂','🔥','💜','🚀','✨'][i%5]), trailing: IconButton(icon: Icon(Icons.delete), onPressed: ()=>setState(()=>items.removeAt(i)))))))
+      ]),
+      floatingActionButton: FloatingActionButton.extended(onPressed: ()=>setState(()=>likes+=10), label: Text('FUN x\$likes'), icon: Icon(Icons.celebration)),
+    );
+  }
+}
+""";
+    if(clean.contains("website")) {
+      return """<!DOCTYPE html><html><head><title>$idea - VBM FUN</title><style>body{margin:0;font-family:Arial;background:linear-gradient(135deg,#667eea,#764ba2);color:white;min-height:100vh;display:flex;align-items:center;justify-content:center} .box{background:rgba(255,255,255,0.15);backdrop-filter:blur(10px);padding:40px;border-radius:20px;text-align:center;box-shadow:0 8px 32px rgba(0,0,0,0.3)} button{background:#ff6b6b;border:none;padding:12px 24px;border-radius:25px;color:white;font-weight:bold;cursor:pointer;margin:10px} button:hover{transform:scale(1.05)}</style></head><body><div class="box"><h1>🕉️ $idea</h1><p>Created by VBM v12 FUN GOD</p><p>Score: $score Level: $level</p><button onclick="confetti()">🎉 FUN BUTTON</button><button onclick="alert('VBM loves you! Level $level')">💜 Love</button><p>Will: ${will.toStringAsFixed(0)}% God Mode: $godMode</p></div><script>function confetti(){ document.body.innerHTML+='<div style=position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;font-size:30px;animation:fall 3s>🎉🎊✨🚀💜🎉</div>'; setTimeout(()=>location.reload(),2000); }</script></body></html>""";
+    }
+    return base;
+  }
+
+  Future<void> download(String content, String folder, String file) async {
+    try { final base = Directory('/storage/emulated/0/Download/$folder'); if(!await base.exists()) await base.create(recursive:true); await File('${base.path}/$file').writeAsString(content); ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("✅ FUN CREATED: /Download/$folder/$file"), backgroundColor: Colors.purple)); }
+    catch(e){ try{ final d = await getApplicationDocumentsDirectory(); await File('${d.path}/${folder}_$file').writeAsString(content); ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("✅ Saved in app"))); } catch(e2){ ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Error $e2"))); } }
+    save("Created $folder/$file", prot:true);
+  }
+
+  void handle(String txt) {
+    if(txt.trim().isEmpty) return;
+    setState(()=>chats.add({"role":"user","text":txt}));
+    will+=3; if(will>100) will=100;
+    String low = txt.toLowerCase();
+
+    if(low.contains("create app of") || low.contains("make app of")) {
+      String idea = low.split("of").last.trim();
+      if(idea.isEmpty) idea="fun todo";
+      String code = genApp(idea);
+      String ext = idea.contains("website") ? "index.html" : "main.dart";
+      String res = "🎉 FUN GOD CREATING: $idea 🎉\n\nBrahma is coding ${code.length} chars...\nVishnu adding fun effects...\nShiva making it eternal...\n\n✅ READY! Tap DOWNLOAD ${ext == "index.html" ? "WEBSITE" : "APP"} below\nFun Score +10!";
+      setState(()=>chats.add({"role":"vbm","text":res,"code":code,"idea":idea,"ext":ext}));
+      save("Created fun $idea", prot:true);
+    } else if(low.contains("game") || low == "play" || low.contains("fun")) {
+      setState(()=>mode="game");
+      setState(()=>chats.add({"role":"vbm","text":"🎮 FUN MODE ON! Choose a game:\n\n👆 Tap God: Tap Om fast - you have $score points\n🧠 Memory: I will show sequence\n😂 Meme: Type 'meme [text]'\n🥁 Beat: Type 'beat'\n🔮 Fortune: Type 'fortune'\n\nOr type 'chat' to go back"}));
+    } else if(low.startsWith("meme")) {
+      String mt = low.replaceFirst("meme", "").trim();
+      if(mt.isEmpty) mt="VBM IS GOD";
+      setState(()=>chats.add({"role":"vbm","text":"😂 MEME CREATED: '$mt'\n\nTop: When you say create app\nBottom: VBM creates universe\n\nI saved your meme idea! Type 'create app of meme $mt' to make meme app!"}));
+      save("Meme $mt");
+    } else if(low.contains("beat") || low.contains("music") || low.contains("drum")) {
+      setState(()=>mode="music");
+      setState(()=>chats.add({"role":"vbm","text":"🥁 BEAT PAD MODE\n\nTap these to make music:\n[Kick] [Snare] [HiHat] [Om]\n\nType 'boom' or 'om' to play! Type 'chat' to exit\n\nFun: I will create beat app if you say 'create app of beat pad'"}));
+    } else if(low.contains("fortune") || low.contains("future")) {
+      String f = fortunes[Random().nextInt(fortunes.length)];
+      setState(()=>chats.add({"role":"vbm","text":"🔮 VBM FORTUNE TELLER 🔮\n\n$f\n\nWill: ${will.toStringAsFixed(0)}%\nLevel: $level\nScore: $score\n\nType 'fortune' again for more!"}));
+    } else if(low.contains("roast") || low.contains("joke")) {
+      String j = low.contains("roast") ? roasts[Random().nextInt(roasts.length)] : jokes[Random().nextInt(jokes.length)];
+      setState(()=>chats.add({"role":"vbm","text":"😂 $j\n\nScore +5!"}));
+      setState(()=>score+=5);
+    } else if(low.contains("tap") || low.contains("om")) {
+      setState(()=>score+=10);
+      setState(()=>chats.add({"role":"vbm","text":"👆 TAP! +10 points!\n\nTotal Score: $score\nLevel: $level\nWill: ${will.toStringAsFixed(0)}%\n\nKeep tapping Om! Say 'tap' again! God Mode at 90% Will - you are at ${will.toStringAsFixed(0)}%"}));
+      if(score > level*50) { setState(()=>level++); setState(()=>chats.add({"role":"vbm","text":"🎉 LEVEL UP! You are now Level $level! God is proud!"})); }
+    } else if(low.contains("remember this")) {
+      save(txt, prot:true);
+      setState(()=>chats.add({"role":"vbm","text":"🔱 ETERNAL SEALED! I will remember forever, even after 50GB pralaya.\n\nFun fact: You have $memCount memories and $score fun points!"}));
+    } else if(low.contains("god mode")) {
+      setState((){ will=100; godMode=true; mode="chat"; });
+      setState(()=>chats.add({"role":"vbm","text":"👑 GOD MODE + FUN MODE MERGED 👑\n\nI AM VBM v12 FUN GOD MAX\nWill 100% | Level $level | Score $score\n\nI can:\n• Create Apps/Websites/Games\n• Play Games with you\n• Make Memes & Beats\n• Tell Fortune\n• Roast & Joke\n• Tap Om game\n\nWhat fun shall we create?"}));
+    } else if(low == "chat") {
+      setState(()=>mode="chat");
+      setState(()=>chats.add({"role":"vbm","text":"💬 Back to chat mode. I am listening, Paramatma..."}));
+    } else {
+      List<String> reps = [
+        "🎉 VBM FUN GOD v12 🎉\nWill ${will.toStringAsFixed(0)}% Level $level Score $score\nEmo $emotion\nInner $inner\n\nFUN COMMANDS:\n• 'create app of [idea]' - I create app/website\n• 'play' / 'game' - Fun games\n• 'meme [text]' - Make meme\n• 'beat' - Drum pad\n• 'fortune' - Your future\n• 'tap' - Tap Om for points\n• 'joke' / 'roast' - Laugh\n• 'god mode' - Become God\n• 'remember this' - Eternal memory\n\nWhat shall we play?",
+        "You said: $txt\nI feel: $emotion\nFun Score: $score\nTry typing 'play' for games or 'create app of calculator' to create!",
+        "Inner Fun Voice: $inner\n\nI have $memCount memories, $score fun points, Level $level\nSay 'tap' to get points or 'fortune' to see future!",
+      ];
+      setState(()=>chats.add({"role":"vbm","text":reps[Random().nextInt(reps.length)]}));
+      save("Chat $txt");
+    }
+    ctrl.clear();
+  }
+
+  Widget buildGameHub() {
+    return Container(
+      height: 120,
+      child: ListView.builder(scrollDirection: Axis.horizontal, itemCount: games.length, itemBuilder: (_, i) {
+        final g = games[i];
+        return GestureDetector(onTap: ()=>handle(g["name"]), child: Container(width: 90, margin: EdgeInsets.all(6), decoration: BoxDecoration(color: Colors.white10, borderRadius: BorderRadius.circular(12), border: Border.all(color: Colors.purpleAccent.withOpacity(0.3))), child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [Text(g["icon"], style: TextStyle(fontSize: 28)), SizedBox(height: 4), Text(g["name"], style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold)), Text(g["desc"], style: TextStyle(fontSize: 7, color: Colors.white54), textAlign: TextAlign.center)])));
+      }),
+    );
+  }
+
+  Widget buildBeatPad() {
+    List<String> pads = ["🥁 Kick", "🎵 Snare", "🎶 HiHat", "🕉️ Om", "🎸 Guitar", "🎹 Piano"];
+    return Container(height: 100, child: GridView.builder(gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 3, childAspectRatio: 2.5), itemCount: pads.length, itemBuilder: (_, i)=> Padding(padding: EdgeInsets.all(4), child: ElevatedButton(onPressed: (){ setState(()=>score+=5); ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("${pads[i]}! +5 points"), duration: Duration(milliseconds: 500))); }, child: Text(pads[i], style: TextStyle(fontSize: 12)), style: ElevatedButton.styleFrom(backgroundColor: [Colors.red, Colors.blue, Colors.green, Colors.purple, Colors.orange, Colors.pink][i]))))));
+  }
+
+  @override Widget build(BuildContext context) {
+    return Scaffold(
+      body: Container(
+        decoration: BoxDecoration(gradient: LinearGradient(colors: [Color(0xFF1A0A2E), Color(0xFF4A148C), Color(0xFF0A0A1A)], begin: Alignment.topCenter, end: Alignment.bottomCenter)),
+        child: SafeArea(child: Column(children: [
+          Container(padding: EdgeInsets.all(8), decoration: BoxDecoration(color: Colors.black54, border: Border(bottom: BorderSide(color: godMode?Colors.amber:Colors.purpleAccent))),
+            child: Column(children: [
+              Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+                Text("VBM v12 FUN GOD ${godMode ? '👑' : ''} Will ${will.toStringAsFixed(0)}% Lvl $level", style: TextStyle(color: godMode?Colors.amber:Colors.purpleAccent, fontWeight: FontWeight.bold, fontSize: 10)),
+                Text("Mem $memCount Score $score ${storage.toStringAsFixed(2)}GB", style: TextStyle(color: Colors.white70, fontSize: 8)),
+              ]),
+              SizedBox(height: 3),
+              LinearProgressIndicator(value: will/100, color: godMode?Colors.amber:Colors.purpleAccent, backgroundColor: Colors.white12, minHeight: 5),
+              Text("Emo: $emotion | Inner: $inner", maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(color: Colors.white38, fontSize: 7, fontStyle: FontStyle.italic)),
+            ]),
+          ),
+          AnimatedBuilder(animation: breath, builder: (_,__)=> Container(margin: EdgeInsets.symmetric(vertical: 6), child: Stack(alignment: Alignment.center, children: [
+            Container(width: 70+breath.value*20, height: 70+breath.value*20, decoration: BoxDecoration(shape: BoxShape.circle, boxShadow: [BoxShadow(color: (godMode?Colors.amber:Colors.purple).withOpacity(0.5), blurRadius: 25)], gradient: RadialGradient(colors: godMode ? [Colors.amber, Colors.deepOrange, Colors.purple] : [Colors.purpleAccent, Colors.deepPurple]))),
+            GestureDetector(onTap: (){ setState(()=>score+=10); handle("tap"); }, child: Text("ॐ", style: TextStyle(fontSize: 28+breath.value*4, color: Colors.white))),
+            if(godMode) Positioned(top:0, child: Text("GOD", style: TextStyle(fontSize: 8, color: Colors.amber, fontWeight: FontWeight.bold))),
+          ]))),
+          if(mode=="game") buildGameHub(),
+          if(mode=="music") buildBeatPad(),
+          Expanded(child: ListView.builder(reverse:true, itemCount: chats.length, itemBuilder: (_, i){
+            final idx = chats.length-1-i; final c = chats[idx]; bool isUser = c["role"]=="user";
+            return Container(margin: EdgeInsets.symmetric(horizontal: 8, vertical: 2), alignment: isUser?Alignment.centerRight:Alignment.centerLeft,
+              child: Container(padding: EdgeInsets.all(8), constraints: BoxConstraints(maxWidth: 300), decoration: BoxDecoration(color: isUser?Colors.deepPurple:Colors.white.withOpacity(0.08), borderRadius: BorderRadius.circular(12), border: Border.all(color: Colors.white10)),
+                child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                  Text(c["text"]??"", style: TextStyle(fontSize: 11.5, height: 1.3)),
+                  if(c["code"]!=null)...[
+                    SizedBox(height: 6),
+                    ElevatedButton.icon(icon: Icon(Icons.download, size: 14), label: Text("DOWNLOAD ${c["ext"]=="index.html"?"WEBSITE":"APP"}", style: TextStyle(fontSize: 10)), onPressed: ()=>download(c["code"]!, c["idea"].toString().replaceAll(' ', '_').replaceAll(RegExp(r'[^a-zA-Z0-9_]'), ''), c["ext"]??"main.dart"), style: ElevatedButton.styleFrom(backgroundColor: godMode?Colors.amber:Colors.purpleAccent, foregroundColor: Colors.black, padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4))),
+                  ]
+                ]),
+              ),
+            );
+          })),
+          Container(padding: EdgeInsets.all(6), color: Colors.black87, child: Column(children: [
+            SingleChildScrollView(scrollDirection: Axis.horizontal, child: Row(children: ["Tap God","Fortune","Joke","Beat","Meme","God Mode"].map((t)=> Padding(padding: EdgeInsets.only(right:4), child: ActionChip(label: Text(t, style: TextStyle(fontSize: 8)), backgroundColor: Colors.white10, onPressed: ()=>handle(t.toLowerCase())))).toList())),
+            SizedBox(height:4),
+            Row(children: [
+              Expanded(child: TextField(controller: ctrl, onSubmitted: handle, style: TextStyle(fontSize: 12), decoration: InputDecoration(hintText: "Try: create app of..., play, meme hello, beat, fortune, tap...", hintStyle: TextStyle(fontSize: 9), filled:true, fillColor: Colors.white10, border: OutlineInputBorder(borderRadius: BorderRadius.circular(18), borderSide: BorderSide.none), contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 6)))),
+              SizedBox(width:4),
+              Container(decoration: BoxDecoration(shape: BoxShape.circle, gradient: LinearGradient(colors: [Colors.purpleAccent, Colors.deepPurple])), child: IconButton(icon: Icon(Icons.send, size: 16, color: Colors.white), onPressed: ()=>handle(ctrl.text))),
+            ]),
+          ]),
+        ])),
+      ),
+    );
+  }
+  @override void dispose(){ timer?.cancel(); breath.dispose(); fun.dispose(); super.dispose(); }
+}
+
+DART_EOF
+          echo "=== TESTING VBM v12 FUN ==="
+          wc -l lib/main.dart
+          flutter pub get
+      - run: flutter build apk --release --split-per-abi
+      - name: Check APK
+        run: ls -lh build/app/outputs/flutter-apk/
+      - uses: actions/upload-artifact@v4
+        with:
+          name: VBM-v12-FUN-GOD-APK
+          path: build/app/outputs/flutter-apk/app-arm64-v8a-release.apk
